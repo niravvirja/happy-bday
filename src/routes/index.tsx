@@ -6,6 +6,7 @@ import cakeAnimation from "@/assets/lottie/cake.json";
 import confettiAnimation from "@/assets/lottie/confetti.json";
 import popperAnimation from "@/assets/lottie/popper.json";
 import { LottieBox } from "@/components/birthday/LottieBox";
+import { VoiceSpectrum } from "@/components/birthday/VoiceSpectrum";
 import { Envelope, type EnvelopeStage } from "@/components/envelope/Envelope";
 import { useBlowDetector } from "@/hooks/useBlowDetector";
 
@@ -45,7 +46,7 @@ function EnvelopePage() {
   const [fontsReady, setFontsReady] = useState(false);
   const [wishArmed, setWishArmed] = useState(false);
 
-  const { start, stop, status, level } = useBlowDetector(() => setBlown(true));
+  const { start, stop, status, level, spectrumRef } = useBlowDetector(() => setBlown(true));
 
   useEffect(() => {
     const list = timers.current;
@@ -249,12 +250,16 @@ function EnvelopePage() {
                         <MicrophoneIcon weight="fill" className="h-3.5 w-3.5" />
                         now blow, {NAME.toLowerCase()}
                       </p>
-                      <div className="h-1.5 w-40 overflow-hidden rounded-full bg-secondary">
+                      <VoiceSpectrum spectrumRef={spectrumRef} />
+                      <div className="h-1.5 w-44 overflow-hidden rounded-full bg-secondary">
                         <div
                           className="h-full rounded-full bg-primary-foreground transition-[width] duration-100"
                           style={{ width: `${Math.min(100, Math.round(level * 130))}%` }}
                         />
                       </div>
+                      <p className="text-[0.52rem] uppercase tracking-[0.34em] text-primary-foreground/70">
+                        {level > 0.28 ? "the flames are wobbling" : "your voice is being heard"}
+                      </p>
                     </div>
                   )}
                 </div>

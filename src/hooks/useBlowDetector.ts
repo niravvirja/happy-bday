@@ -16,6 +16,8 @@ export function useBlowDetector(onBlow: () => void) {
   const [status, setStatus] = useState<Status>("idle");
   const [level, setLevel] = useState(0);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const BANDS = 28;
+  const spectrumRef = useRef<Float32Array>(new Float32Array(BANDS));
   const firedRef = useRef(false);
   const callbackRef = useRef(onBlow);
   callbackRef.current = onBlow;
@@ -75,6 +77,25 @@ export function useBlowDetector(onBlow: () => void) {
         );
         setLevel(result.level);
 
+        // Compact the FFT into a handful of perceptual bands for the visualiser.
+        const bins = frequencyBins.length;
+        const bands = spectrumRef.current;
+        for (let b = 0; b < bands.length; b += 1) {
+          const from = Math.floor(Math.pow(b / bands.length, 1.7) * bins);
+          const to = Math.max(from + 1, Math.floor(Math.pow((b + 1) / bands.length, 1.7) * bins));
+          let peak = -140;
+          for (let i = from; i < to && i < bins; i += 1) {
+            const v = frequencyBins[i] ?? -140;
+            if (Number.isFinite(v) && v > peak) peak = v;
+          }
+          const target = Math.min(
+            1,
+            Math.max(0, (peak - analyser.minDecibels) / (analyser.maxDecibels - analyser.minDecibels)),
+          );
+          const prev = bands[b] ?? 0;
+          bands[b] = prev + (target - prev) * 0.45;
+        }
+
         if (result.detected && !firedRef.current) {
           firedRef.current = true;
           callbackRef.current();
@@ -99,11 +120,12 @@ export function useBlowDetector(onBlow: () => void) {
         void ctx.close();
         setStatus("idle");
         setLevel(0);
+        spectrumRef.current.fill(0);
       };
     } catch {
       setStatus("denied");
     }
   }, []);
 
-  return { start, stop, status, level };
+  return { start, stop, status, level, spectrumRef };
 }
