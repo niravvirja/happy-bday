@@ -40,6 +40,10 @@ function EnvelopePage() {
   const [blown, setBlown] = useState(false);
   const [started, setStarted] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // The letter's headline fonts must be fully loaded before the sheet reveals
+  // its text, otherwise the browser paints a fallback face first and swaps.
+  const [fontsReady, setFontsReady] = useState(false);
+  const [wishArmed, setWishArmed] = useState(false);
 
   const { start, stop, status, level } = useBlowDetector(() => setBlown(true));
 
@@ -49,20 +53,50 @@ function EnvelopePage() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    const done = () => !cancelled && setFontsReady(true);
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    if (!fonts) {
+      done();
+      return;
+    }
+    Promise.all([
+      fonts.load('400 3rem "Mr Dafoe"'),
+      fonts.load('800 2.5rem "Sora"'),
+      fonts.load('400 1rem "Space Grotesk"'),
+    ])
+      .then(() => fonts.ready)
+      .then(done, done);
+    // never hang on a slow network
+    const bail = setTimeout(done, 3500);
+    return () => {
+      cancelled = true;
+      clearTimeout(bail);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (wishArmed && fontsReady) setPhase("wish");
+  }, [wishArmed, fontsReady]);
+
+  useEffect(() => {
     if (blown) stop();
   }, [blown, stop]);
 
   const open = useCallback(() => {
     setStage("opening");
     timers.current.push(setTimeout(() => setStage("open"), 1650));
-    timers.current.push(setTimeout(() => setPhase("wish"), 2000));
+    timers.current.push(setTimeout(() => setWishArmed(true), 2000));
   }, []);
+
 
   const close = useCallback(() => {
     stop();
     setStarted(false);
     setBlown(false);
+    setWishArmed(false);
     setPhase("blank");
+
     setStage("closing");
     timers.current.push(setTimeout(() => setStage("sealed"), 1500));
   }, [stop]);
@@ -132,7 +166,7 @@ function EnvelopePage() {
                   </Reveal>
 
                   <Reveal delay={520}>
-                    <p className="max-w-[34ch] text-justify text-[0.85rem] leading-[1.75]] font-bold uppercase leading-[1.6] tracking-wide text-primary-foreground">
+                    <p className="max-w-[34ch] text-justify text-[0.7rem] sm:text-[0.835rem] font-bold uppercase leading-[1.6] tracking-wide text-primary-foreground">
                       Belated happy birthday, Manasvaaaa. the world is softer bcz you're in ittt.
                     </p>
                   </Reveal>
