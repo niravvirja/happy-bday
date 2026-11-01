@@ -10,18 +10,18 @@ import { VoiceSpectrum } from "@/components/birthday/VoiceSpectrum";
 import { Envelope, type EnvelopeStage } from "@/components/envelope/Envelope";
 import { useBlowDetector } from "@/hooks/useBlowDetector";
 
-const NAME = "Manasvi";
+const NAME = "Yashvi";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "A Sealed Letter for Manasvi — Belated Happy Birthday" },
+      { title: "A Sealed Letter for Yashvi — Belated Happy Birthday" },
       {
         name: "description",
         content:
-          "Tap the wax seal, unfold the envelope and read the belated birthday letter written for Manasvi — then blow out the candles to seal the wish.",
+          "Tap the wax seal, unfold the envelope and read the belated birthday letter written for Yashvi — then blow out the candles to seal the wish.",
       },
-      { property: "og:title", content: "A Sealed Letter for Manasvi — Belated Happy Birthday" },
+      { property: "og:title", content: "A Sealed Letter for Yashvi — Belated Happy Birthday" },
       {
         property: "og:description",
         content: "Unfold the envelope, read the belated birthday letter, blow out the candles and make the wish.",
@@ -168,7 +168,7 @@ function EnvelopePage() {
 
                   <Reveal delay={520}>
                     <p className="max-w-[34ch] text-justify text-[0.7rem] sm:text-[0.835rem] font-bold uppercase leading-[1.6] tracking-wide text-primary-foreground">
-                      Belated happy birthday, Manasvaaaa. the world is softer bcz you're in ittt.
+                      Belated happy birthday, Yashvaaa. the world is softer bcz you're in ittt.
                     </p>
                   </Reveal>
 
